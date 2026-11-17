@@ -195,7 +195,7 @@ input,textarea{font:inherit;font-size:15px;text-transform:none;letter-spacing:0;
       <div class="hud" id="hudBL"></div>
       <div class="hud" id="hudBR">00:00</div>
       <div id="subs"></div>
-      <audio id="vAudio" src="voix-off.mp3" preload="auto"></audio>
+      <audio id="vAudio" preload="auto"></audio>
       <div class="grain"></div>
     </div>
   </div>
@@ -210,6 +210,7 @@ input,textarea{font:inherit;font-size:15px;text-transform:none;letter-spacing:0;
     </div>
     <div class="row">
       <button class="btn" id="vo" type="button" aria-pressed="false">Activer la voix off</button>
+      <button class="btn" id="mu" type="button" aria-pressed="false">Musique</button>
       <button class="btn" id="st" type="button" aria-pressed="false">Sous-titres</button>
       <select id="voice" aria-label="Voix de lecture"></select>
       <span class="vo-msg" id="voMsg"></span>
@@ -249,7 +250,7 @@ input,textarea{font:inherit;font-size:15px;text-transform:none;letter-spacing:0;
         <label class="full">04 · Méthode (00:25)<textarea id="f_v3" name="v3" rows="2"></textarea></label>
         <label class="full">05 · Signature (00:32)<textarea id="f_v4" name="v4" rows="2"></textarea></label>
       </form>
-      <p class="note">Les textes viennent de vos fichiers du kit. Vos modifications restent dans ce navigateur. Pour exporter en vidéo, passez en plein écran et enregistrez l'écran avec le son pendant 40 secondes. La voix studio est un fichier audio de 40 secondes calé sur l'animation.</p>
+      <p class="note">Les textes viennent de vos fichiers du kit. Vos modifications restent dans ce navigateur. Pour exporter en vidéo, passez en plein écran et enregistrez l'écran avec le son pendant 40 secondes. La voix studio et la musique sont des fichiers audio de 40 secondes calés sur l'animation.</p>
     </section>
   </div>
 </div>
@@ -481,7 +482,7 @@ input,textarea{font:inherit;font-size:15px;text-transform:none;letter-spacing:0;
   const CUES = [0.5, 7.6, 15.6, 25.4, 32.8];
   const synth = window.speechSynthesis;
   const audio = $("vAudio");
-  let voOn = false, subsOn = false, lastCue = -1, voice = null, mode = "studio";
+  let voOn = false, musicOn = false, subsOn = false, lastCue = -1, voice = null, mode = "studio";
   const voBtn=$("vo"), stBtn=$("st"), voiceSel=$("voice"), voMsg=$("voMsg"), subs=$("subs");
   const cueAt = tt => { let c=-1; CUES.forEach((s,i)=>{ if(tt>=s) c=i; }); return c; };
   const say = i => {
@@ -512,13 +513,16 @@ input,textarea{font:inherit;font-size:15px;text-transform:none;letter-spacing:0;
   voiceSel.addEventListener("change", applyMode);
   voBtn.addEventListener("click",()=>{
     voOn=!voOn; voBtn.setAttribute("aria-pressed",String(voOn)); voBtn.textContent = voOn ? "Voix off activée" : "Activer la voix off";
-    hush(); if(voOn){ t=0; lastCue=-1; playing=true; if(mode==="studio"){ try{ audio.currentTime=0; audio.play().catch(()=>{}); }catch(e){} } } frame();
+    hush(); if(voOn){ t=0; lastCue=-1; playing=true; } frame();
   });
+  $("mu").addEventListener("click",e=>{ musicOn=!musicOn; e.currentTarget.setAttribute("aria-pressed",String(musicOn)); if(musicOn && !playing){ if(t>=DUR) t=0; playing=true; } frame(); });
   stBtn.addEventListener("click",()=>{ subsOn=!subsOn; stBtn.setAttribute("aria-pressed",String(subsOn)); frame(); });
   function voiceFrame(){
     const c=cueAt(t);
     if(playing && c!==lastCue){ lastCue=c; if(c>=0 && t-CUES[c]<1.2) say(c); }
-    if(voOn && mode==="studio" && playing && t<DUR){
+    const want = (voOn && mode==="studio") ? (musicOn ? "voix-off-musique.mp3" : "voix-off.mp3") : (musicOn ? "musique-ambiance.mp3" : "");
+    if(want && audio.dataset.track!==want){ try{ audio.pause(); }catch(e){} audio.dataset.track=want; audio.src=want; }
+    if(want && playing && t<DUR){
       if(audio.paused){ try{ audio.currentTime=t; audio.play().catch(()=>{}); }catch(e){} }
       else if(Math.abs(audio.currentTime-t)>.25){ audio.currentTime=t; }
     } else if(!audio.paused) audio.pause();
