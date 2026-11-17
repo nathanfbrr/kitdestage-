@@ -2,14 +2,14 @@ const {chromium}=require('playwright'); const {spawn}=require('child_process');
 const FPS=+(process.argv[2]||30), OUT=process.argv[3]||'out.mp4', DUR=40;
 (async()=>{
   const b=await chromium.launch();const p=await b.newPage({viewport:process.env.VERT?{width:1080,height:1920}:{width:1920,height:1080},deviceScaleFactor:1});
-  await p.goto('file:///home/user/Nathan/motion/kit-premier-stage-40s.html'+(process.env.VERT?'#vertical':''));
+  await p.goto('file://'+process.env.HTML+(process.env.HASH||''));
   await p.evaluate(()=>document.fonts.ready);
   console.log('fonts', await p.evaluate(()=>[document.fonts.check('200 100px Sora'),document.fonts.check('400 20px Inter'),document.fonts.check('400 20px "JetBrains Mono"')]));
   await p.click('#play'); // pause
   await p.addStyleTag({content:`body{padding:0!important;margin:0;overflow:hidden;background:#07080C}.wrap>*:not(#stageWrap){display:none!important}.wrap{max-width:none!important}#stageWrap{position:fixed!important;inset:0;width:100vw!important;height:100vh!important;max-width:none!important;margin:0!important;border-radius:0!important;box-shadow:none!important}`});
   await p.waitForTimeout(500);
   const ff=spawn('ffmpeg',['-y','-loglevel','error','-f','image2pipe','-framerate',String(FPS),'-c:v','png','-i','-',
-    '-i','/home/user/Nathan/motion/voix-off-musique.wav','-map','0:v','-map','1:a',
+    '-i',process.env.AUDIO,'-map','0:v','-map','1:a',
     '-c:v','libx264','-preset','slow','-crf','16','-pix_fmt','yuv420p','-tune','film',
     '-c:a','aac','-b:a','256k','-ar','48000','-movflags','+faststart','-t','40',OUT],{stdio:['pipe','inherit','inherit']});
   const total=FPS*DUR;
