@@ -7,7 +7,7 @@
   - contactEmail  : l'adresse affichée pour le service client.
 */
 window.KIT_CONFIG = {
-  price: "19 €",
+  price: "14,40 €",
   checkoutUrl: "https://payhip.com/b/1UZkR",
   contactEmail: "contact@exemple.fr"
 };

@@ -121,7 +121,7 @@ body::after{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-
 .buy{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:stretch}
 .offer{background:var(--card);border-radius:34px;padding:38px;display:flex;flex-direction:column;gap:24px;box-shadow:0 30px 70px -36px rgba(16,18,23,.55);position:relative;overflow:hidden}
 .offer::before{content:"";position:absolute;inset:0 0 auto;height:6px;background:linear-gradient(90deg,var(--violet),var(--hl))}
-.price{display:flex;align-items:baseline;gap:12px}
+.price{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
 .price b{font-family:var(--display);font-stretch:125%;font-weight:900;font-size:76px;letter-spacing:-.05em;line-height:1}
 .price span{color:var(--muted);font-size:15px}
 .incl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
