@@ -22,7 +22,10 @@ Site statique (HTML, CSS, JavaScript), sans outil de compilation. Il s'héberge 
 3. **Le médiateur de la consommation** : l'adhésion est obligatoire pour vendre à des particuliers (par exemple CM2C ou Médicys, quelques dizaines d'euros par an).
 4. **L'e-mail de confirmation** : il doit rappeler que le client a demandé l'accès immédiat et renoncé à son droit de rétractation (article L221-13 du Code de la consommation). La plupart des plateformes de paiement permettent d'ajouter ce texte.
 
-## Choisir le paiement
+## Paiement avec Payhip
+Le site est configuré pour Payhip : crée ton produit sur payhip.com (en y déposant les 6 fichiers), copie le lien du produit (https://payhip.com/b/XXXX) et colle-le dans `checkoutUrl` dans `config.js`. Dans les réglages Payhip, ajoute au message de confirmation la phrase sur la renonciation au droit de rétractation.
+
+## Autres solutions de paiement
 - **Lemon Squeezy ou Gumroad** : le plus simple pour un produit numérique. Ils hébergent le fichier, envoient le lien de téléchargement et la facture, et gèrent la TVA européenne en tant que « vendeur officiel ». Une commission un peu plus élevée.
 - **Stripe Payment Links** : commission plus faible, mais il faut gérer soi-même l'envoi du fichier et la TVA.
 
