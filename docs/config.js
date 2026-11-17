@@ -8,6 +8,6 @@
 */
 window.KIT_CONFIG = {
   price: "19 €",
-  checkoutUrl: "",
+  checkoutUrl: "https://payhip.com/b/1UZkR",
   contactEmail: "contact@exemple.fr"
 };
