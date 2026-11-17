@@ -46,6 +46,11 @@ header p{margin:0;color:var(--muted);max-width:60ch}
 .chip{display:inline-flex;align-items:center;gap:12px;border-radius:999px;padding:16px 30px;font-family:var(--body);font-weight:700;font-size:32px;color:var(--fg)}
 #wipe{position:absolute;left:-25%;top:-25%;width:150%;height:150%;transform:skewX(-14deg);visibility:hidden}
 #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+#shake{transform-origin:50% 50%}
+/* TikTok interface zones (preview only, never rendered into the video) */
+#tkZones{position:absolute;inset:0;pointer-events:none;display:none;z-index:50}
+#tkZones.show{display:block}
+#tkZones div{position:absolute;background:rgba(255,0,60,.28);outline:3px dashed rgba(255,255,255,.8);font:600 30px/1.2 var(--body);color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px}
 .grain{position:absolute;inset:0;opacity:.07;mix-blend-mode:overlay;pointer-events:none;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 
@@ -162,6 +167,7 @@ ol.beats li.on .t{color:var(--accent)}
       <div id="wipe"></div>
       <div id="flash"></div>
       <div class="grain"></div>
+      <div id="tkZones"><div style="left:0;right:0;top:0;height:150px">En-tête TikTok</div><div style="right:0;top:760px;width:140px;height:680px">Boutons</div><div style="left:0;right:0;bottom:0;height:480px">Légende, pseudo, musique</div></div>
       <audio id="aud" preload="auto" src="dynamique-mix.mp3"></audio>
     </div>
   </div>
@@ -172,6 +178,8 @@ ol.beats li.on .t{color:var(--accent)}
       <button class="btn" id="restart" type="button">Revenir au début</button>
       <button class="btn" id="snd" type="button" aria-pressed="false">Activer le son</button>
       <button class="btn" id="fmt" type="button" aria-pressed="false">Format horizontal 16:9</button>
+      <button class="btn" id="tk" type="button" aria-pressed="true">Cadrage TikTok</button>
+      <button class="btn" id="tkz" type="button" aria-pressed="false">Voir les zones TikTok</button>
       <button class="btn" id="fs" type="button">Plein écran</button>
       <div class="tc"><b id="tcNow">00:00.0</b> / 00:40.0</div>
     </div>
@@ -181,7 +189,7 @@ ol.beats li.on .t{color:var(--accent)}
   <section class="panel">
     <h2>Les plans</h2>
     <ol class="beats" id="beats"></ol>
-    <p class="note">Format vertical par défaut, prêt pour Reels, TikTok et Shorts. La voix off et la musique sont calées sur l'animation : cliquez sur « Activer le son ».</p>
+    <p class="note">Format vertical par défaut, avec le cadrage TikTok : le contenu reste hors des zones couvertes par les boutons et la légende de l'application (« Voir les zones TikTok » pour les afficher). La voix off et la musique sont calées sur l'animation : cliquez sur « Activer le son ».</p>
   </section>
 </div>
 
@@ -213,7 +221,7 @@ ol.beats li.on .t{color:var(--accent)}
     [28,"Règle : 1 page"],[29,"Règle : 10 min"],[30,"Règle : 0 faute"],[31,"Règle : J+7"],[32,"Appel à l'action"],[36,"Signature finale"]];
 
   const stage=$("stage"), wrap=$("stageWrap");
-  let H=false, SW=1080, SH=1920;
+  let H=false, SW=1080, SH=1920, TK=true;
 
   // ---------- build dynamic DOM ----------
   const c2=$("c2"); "Panique.".split("").forEach(ch=>{const s=document.createElement("span");s.textContent=ch;s.style.display="inline-block";c2.appendChild(s);});
@@ -267,7 +275,8 @@ ol.beats li.on .t{color:var(--accent)}
 
     // camera shake after hits
     let sx=0,sy=0; HITS.forEach((h,i)=>{const d=t-h; if(d>=0&&d<.35){const a=16*Math.exp(-d*14);sx+=a*Math.sin(d*95+i);sy+=a*Math.cos(d*83+i*2);}});
-    $("shake").style.transform=`translate(${sx}px,${sy}px)`;
+    const tb=(TK&&!H)?{x:-40,y:-80,s:.86}:{x:0,y:0,s:1};
+    $("shake").style.transform=`translate(${sx+tb.x}px,${sy+tb.y}px) scale(${tb.s})`;
 
     // S1 0–2
     if(vis("S1",t,0,2)){ slam($("a1"),t,0,1.75,{y0:-60}); slam($("a2"),t,.5,1.75,{y0:80}); slam($("a3"),t,1,1.75,{r0:-40,s0:3}); }
@@ -371,6 +380,8 @@ ol.beats li.on .t{color:var(--accent)}
     const b=$("fmt");b.setAttribute("aria-pressed",String(H));b.textContent=H?"Format vertical 9:16":"Format horizontal 16:9";
     try{history.replaceState(null,"",H?"#horizontal":location.pathname+location.search);}catch(e){} fit(); frame();}
   $("fmt").addEventListener("click",()=>setFormat(!H));
+  $("tk").addEventListener("click",e=>{TK=!TK;e.currentTarget.setAttribute("aria-pressed",String(TK));frame();});
+  $("tkz").addEventListener("click",e=>{const on=$("tkZones").classList.toggle("show");e.currentTarget.setAttribute("aria-pressed",String(on));});
   window.addEventListener("hashchange",()=>{const h=location.hash==="#horizontal";if(h!==H)setFormat(h);});
   setFormat(location.hash==="#horizontal"); requestAnimationFrame(tick);
 })();
