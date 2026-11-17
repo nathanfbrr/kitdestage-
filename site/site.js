@@ -9,6 +9,15 @@
   });
   const y = document.getElementById("year"); if (y) y.textContent = new Date().getFullYear();
 
+  // mobile menu
+  const header = document.querySelector(".site-header"), menuBtn = document.getElementById("menuBtn");
+  if (header && menuBtn) {
+    const setOpen = open => { header.classList.toggle("open", open); menuBtn.setAttribute("aria-expanded", String(open)); };
+    menuBtn.addEventListener("click", () => setOpen(!header.classList.contains("open")));
+    document.addEventListener("keydown", e => { if (e.key === "Escape") setOpen(false); });
+    document.addEventListener("click", e => { if (!header.contains(e.target)) setOpen(false); });
+  }
+
   const box = document.getElementById("consent"), pay = document.getElementById("payBtn"), msg = document.getElementById("payMsg");
   if (!box || !pay) return;
   const sync = () => {

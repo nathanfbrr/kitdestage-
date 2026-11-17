@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Acheter · Kit Premier Stage</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Obtenir le Kit Premier Stage : paiement unique, téléchargement immédiat.">
+<meta property="og:title" content="Kit Premier Stage">
+<meta property="og:description" content="6 fichiers prêts à remplir et une méthode simple : 30 candidatures en 4 semaines.">
+<meta property="og:image" content="media/demo-poster.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,600..900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container nav">
+    <a class="brand" href="index.html"><span class="badge">1<sup>er</sup></span>Kit Premier Stage</a>
+    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="mainNav"><span></span><span></span><span class="sr">Menu</span></button>
+    <nav class="nav-links" id="mainNav" aria-label="Pages du site">
+      <a href="index.html">Accueil</a><a href="contenu.html">Le contenu</a><a href="methode.html">La méthode</a><a href="faq.html">Questions</a>
+      <a class="btn btn-primary nav-buy" href="acheter.html" aria-current="page">Acheter · <span data-cfg="price">19 €</span></a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <!-- BUY -->
+  <section id="acheter" class="page-first">
+    <div class="container">
+      <div class="sec-head reveal">
+        <div class="lbl">Obtenir le kit</div>
+        <h2>Tout est prêt. <span class="hl">Il reste à remplir.</span></h2>
+      </div>
+      <div class="buy">
+        <div class="offer reveal">
+          <div>
+            <h3 style="font-size:28px">Kit Premier Stage</h3>
+            <p style="color:var(--muted);margin-top:6px">Accès complet aux 6 fichiers, à vie.</p>
+          </div>
+          <div class="price"><b data-cfg="price">19 €</b><span>TTC · paiement unique</span></div>
+          <ul class="incl">
+            <li>Mode d'emploi et planning sur 4 semaines</li>
+            <li>Modèle de CV étudiant et exemple rempli</li>
+            <li>Lettre de motivation : structure, modèle et exemple</li>
+            <li>6 modèles d'e-mails et de messages</li>
+            <li>Fiche de préparation d'entretien</li>
+            <li>Tableau Excel de suivi des candidatures</li>
+          </ul>
+          <label class="consent" for="consent">
+            <input type="checkbox" id="consent">
+            <span>J'accepte les <a href="cgv.html">conditions générales de vente</a>. Je demande l'accès immédiat au contenu numérique et je reconnais perdre mon droit de rétractation dès le début du téléchargement.</span>
+          </label>
+          <a class="btn btn-primary" id="payBtn" href="acheter.html" aria-disabled="true" role="button">Payer <span data-cfg="price">19 €</span> <span class="arr" aria-hidden="true">→</span></a>
+          <p class="pay-msg" id="payMsg" role="status" aria-live="polite"></p>
+          <div class="secure"><span>Paiement sécurisé par un prestataire spécialisé</span><span>Fichiers envoyés par e-mail</span><span>Facture disponible</span></div>
+        </div>
+        <div class="side">
+          <div class="card reveal"><h3>Téléchargement immédiat</h3><p>Après le paiement, tu reçois un lien de téléchargement par e-mail. Les fichiers s'ouvrent avec Word, Excel, Google Docs, Google Sheets ou LibreOffice.</p></div>
+          <div class="card reveal"><h3>Pensé pour un premier stage</h3><p>Lycée pro, BTS, BUT, licence, école de commerce ou d'ingénieurs : les modèles partent de ce que tu as déjà fait (jobs d'été, projets, associations, sport).</p></div>
+          <div class="card reveal"><h3>Une question avant d'acheter ?</h3><p>Écris à <a data-cfg="email" href="mailto:contact@exemple.fr">contact@exemple.fr</a>. Réponse sous 48 h ouvrées.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="container foot">
+    <span>© <span id="year">2026</span> Kit Premier Stage</span>
+    <nav aria-label="Plan du site">
+      <a href="index.html">Accueil</a><a href="contenu.html">Le contenu</a><a href="methode.html">La méthode</a><a href="faq.html">Questions</a><a href="acheter.html">Acheter</a>
+    </nav>
+    <nav aria-label="Informations légales">
+      <a href="mentions-legales.html">Mentions légales</a><a href="cgv.html">Conditions générales de vente</a><a href="confidentialite.html">Confidentialité et cookies</a><a data-cfg="email" href="mailto:contact@exemple.fr">Contact</a>
+    </nav>
+  </div>
+</footer>
+
+
+<script src="config.js"></script>
+<script src="site.js"></script>
+</body>
+</html>

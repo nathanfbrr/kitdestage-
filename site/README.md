@@ -3,7 +3,9 @@
 Site statique (HTML, CSS, JavaScript), sans outil de compilation. Il s'héberge tel quel sur GitHub Pages, Netlify, Vercel ou n'importe quel hébergeur.
 
 ## Pages
-- `index.html` : la page de vente (présentation, contenu, méthode, espace d'achat, FAQ)
+- `index.html` : l'accueil (présentation et raccourcis vers les autres pages)
+- `contenu.html`, `methode.html`, `faq.html` : le contenu du kit, la méthode, les questions
+- `acheter.html` : l'espace d'achat (prix, case de consentement, bouton de paiement)
 - `mentions-legales.html`, `cgv.html`, `confidentialite.html` : les pages légales
 - `style.css` : le style commun · `site.js` : prix, contact et bouton de paiement · `config.js` : les réglages
 - `media/` : la vidéo de démonstration et son image d'attente
