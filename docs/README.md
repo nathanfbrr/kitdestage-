@@ -32,7 +32,7 @@ Le site est configuré pour Payhip : crée ton produit sur payhip.com (en y dép
 Dans tous les cas, colle le lien obtenu dans `checkoutUrl`.
 
 ## Mise en ligne rapide avec GitHub Pages
-Dépôt GitHub → Settings → Pages → Build and deployment → Source : « Deploy from a branch », branche `claude/upbeat-allen-ymmm6g`, dossier `/docs`. L'adresse du site sera https://nathanfbrr.github.io/Nathan/. L'hébergeur GitHub est déjà indiqué dans les mentions légales.
+Dépôt GitHub → Settings → Pages → Build and deployment → Source : « Deploy from a branch », branche `claude/upbeat-allen-ymmm6g`, dossier `/docs`. L'adresse du site sera https://nathanfbrr.github.io/kitdestage-/. L'hébergeur GitHub est déjà indiqué dans les mentions légales.
 
 ## Bon à savoir
 - Le site ne dépose aucun cookie et n'a pas d'outil de statistiques : pas besoin de bandeau cookies. Si tu ajoutes le pixel TikTok ou Google Analytics, il faudra un bandeau de consentement et mettre à jour `confidentialite.html`.
