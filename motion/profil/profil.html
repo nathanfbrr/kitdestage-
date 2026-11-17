@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Inter:wght@700&display=swap">
+<style>
+*{box-sizing:border-box;margin:0}
+body{background:#ddd}
+.av{width:1080px;height:1080px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;font-family:"Archivo","Arial Black",sans-serif}
+/* subtle dot grid, same as the videos */
+.dots::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.16) 4px,transparent 4.6px);background-size:72px 72px;opacity:.6}
+.mark{position:relative;display:flex;flex-direction:column;align-items:center;line-height:.82}
+.big{font-stretch:125%;font-weight:900;letter-spacing:-.05em;position:relative;z-index:1}
+.sup{font-size:.42em;vertical-align:.95em;letter-spacing:-.02em;margin-left:.04em}
+.hl{position:absolute;z-index:0;background:#FFE04A;border-radius:14px;transform:rotate(-2deg)}
+.word{font-stretch:125%;font-weight:900;letter-spacing:-.02em;position:relative;z-index:1}
+.check{position:absolute;border-radius:50%;background:#12A863;display:flex;align-items:center;justify-content:center;box-shadow:0 18px 40px -12px rgba(0,0,0,.35)}
+.check svg path{fill:none;stroke:#fff;stroke-linecap:round;stroke-linejoin:round}
+
+/* A · violet, "1er" + STAGE */
+#A{background:#5B3DF5;color:#fff}
+#A .big{font-size:470px}
+#A .word{font-size:150px;color:#101217;margin-top:18px;padding:0 26px}
+#A .hl{left:0;right:0;bottom:-6px;height:150px}
+#A .check{width:165px;height:165px;right:135px;top:150px}
+
+/* B · yellow, KPS monogram */
+#B{background:#FFE04A;color:#101217}
+#B .big{font-size:300px}
+#B .word{font-size:62px;color:#5B3DF5;margin-top:40px;letter-spacing:.01em;white-space:nowrap}
+#B .check{width:160px;height:160px;right:200px;top:220px}
+
+/* C · ink, "1er" with yellow highlight */
+#C{background:#101217;color:#fff}
+#C .big{font-size:520px;padding:0 30px}
+#C .hl{left:0;right:0;bottom:70px;height:170px}
+#C .big b{position:relative;z-index:1;color:#FFE04A;font-weight:900}
+#C .word{font-size:120px;margin-top:30px;color:#fff}
+#C .word i{font-style:normal;color:#FFE04A}
+</style></head><body>
+
+<div class="av dots" id="A"><div class="mark">
+  <div class="big">1<span class="sup">er</span></div>
+  <div style="position:relative"><span class="hl"></span><div class="word">STAGE</div></div>
+</div>
+<div class="check"><svg width="110" height="110" viewBox="0 0 34 34"><path d="M7 18 l7 7 l13 -15" stroke-width="5"/></svg></div></div>
+
+<div class="av" id="B"><div class="mark">
+  <div class="big">KPS</div>
+  <div class="word">KIT PREMIER STAGE</div>
+</div>
+<div class="check"><svg width="100" height="100" viewBox="0 0 34 34"><path d="M7 18 l7 7 l13 -15" stroke-width="5"/></svg></div></div>
+
+<div class="av dots" id="C"><div class="mark">
+  <div style="position:relative"><div class="big"><b>1<span class="sup">er</span></b></div></div>
+  <div class="word">STAGE <i>✓</i></div>
+</div></div>
+
+</body></html>
