@@ -1,5 +1,7 @@
 # Site du Kit Premier Stage
 
+Le site est dans le dossier `docs/` pour être publié directement par GitHub Pages.
+
 Site statique (HTML, CSS, JavaScript), sans outil de compilation. Il s'héberge tel quel sur GitHub Pages, Netlify, Vercel ou n'importe quel hébergeur.
 
 ## Pages
@@ -27,7 +29,7 @@ Site statique (HTML, CSS, JavaScript), sans outil de compilation. Il s'héberge 
 Dans tous les cas, colle le lien obtenu dans `checkoutUrl`.
 
 ## Mise en ligne rapide avec GitHub Pages
-Dépôt GitHub → Settings → Pages → Source : la branche, dossier `/site` (ou déplace le dossier à la racine). L'hébergeur à indiquer dans les mentions légales est alors GitHub Inc.
+Dépôt GitHub → Settings → Pages → Build and deployment → Source : « Deploy from a branch », branche `claude/upbeat-allen-ymmm6g`, dossier `/docs`. L'adresse du site sera https://nathanfbrr.github.io/Nathan/. L'hébergeur GitHub est déjà indiqué dans les mentions légales.
 
 ## Bon à savoir
 - Le site ne dépose aucun cookie et n'a pas d'outil de statistiques : pas besoin de bandeau cookies. Si tu ajoutes le pixel TikTok ou Google Analytics, il faudra un bandeau de consentement et mettre à jour `confidentialite.html`.
