@@ -9,5 +9,5 @@
 window.KIT_CONFIG = {
   price: "14,40 €",
   checkoutUrl: "https://payhip.com/b/1UZkR",
-  contactEmail: "contact@exemple.fr"
+  contactEmail: "ebaynfbr@gmail.com"
 };
