@@ -1,0 +1,33 @@
+# Site du Kit Premier Stage
+
+Site statique (HTML, CSS, JavaScript), sans outil de compilation. Il s'héberge tel quel sur GitHub Pages, Netlify, Vercel ou n'importe quel hébergeur.
+
+## Pages
+- `index.html` : la page de vente (présentation, contenu, méthode, espace d'achat, FAQ)
+- `mentions-legales.html`, `cgv.html`, `confidentialite.html` : les pages légales
+- `style.css` : le style commun · `site.js` : prix, contact et bouton de paiement · `config.js` : les réglages
+- `media/` : la vidéo de démonstration et son image d'attente
+
+## À faire avant la mise en ligne
+
+1. **Le prix, le lien de paiement et l'e-mail** : dans `config.js`.
+   - `price` : le prix TTC affiché partout.
+   - `checkoutUrl` : ton lien de paiement. Tant qu'il est vide, le bouton « Payer » affiche « Le paiement n'est pas encore activé ».
+   - `contactEmail` : ton adresse de contact.
+2. **Les champs surlignés en jaune** dans les trois pages légales : identité, statut, SIRET, adresse, TVA, hébergeur, prestataire de paiement, médiateur, dates.
+3. **Le médiateur de la consommation** : l'adhésion est obligatoire pour vendre à des particuliers (par exemple CM2C ou Médicys, quelques dizaines d'euros par an).
+4. **L'e-mail de confirmation** : il doit rappeler que le client a demandé l'accès immédiat et renoncé à son droit de rétractation (article L221-13 du Code de la consommation). La plupart des plateformes de paiement permettent d'ajouter ce texte.
+
+## Choisir le paiement
+- **Lemon Squeezy ou Gumroad** : le plus simple pour un produit numérique. Ils hébergent le fichier, envoient le lien de téléchargement et la facture, et gèrent la TVA européenne en tant que « vendeur officiel ». Une commission un peu plus élevée.
+- **Stripe Payment Links** : commission plus faible, mais il faut gérer soi-même l'envoi du fichier et la TVA.
+
+Dans tous les cas, colle le lien obtenu dans `checkoutUrl`.
+
+## Mise en ligne rapide avec GitHub Pages
+Dépôt GitHub → Settings → Pages → Source : la branche, dossier `/site` (ou déplace le dossier à la racine). L'hébergeur à indiquer dans les mentions légales est alors GitHub Inc.
+
+## Bon à savoir
+- Le site ne dépose aucun cookie et n'a pas d'outil de statistiques : pas besoin de bandeau cookies. Si tu ajoutes le pixel TikTok ou Google Analytics, il faudra un bandeau de consentement et mettre à jour `confidentialite.html`.
+- Les polices viennent de Google Fonts. Pour être plus strict sur le RGPD, télécharge-les et héberge-les dans le dossier du site.
+- Les pages légales sont des modèles sérieux, mais elles ne remplacent pas l'avis d'un juriste.
