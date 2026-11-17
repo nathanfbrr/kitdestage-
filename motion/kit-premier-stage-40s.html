@@ -106,6 +106,8 @@ header p{margin:0;color:var(--muted);max-width:60ch}
 #hudTL{left:72px;top:60px} #hudTR{right:72px;top:60px;text-align:right}
 #hudBL{left:72px;bottom:60px} #hudBR{right:72px;bottom:60px;text-align:right;font-variant-numeric:tabular-nums}
 
+#subs{position:absolute;left:0;right:0;bottom:122px;padding:0 260px;text-align:center;font-family:var(--body);font-size:30px;line-height:1.4;color:rgba(244,246,250,.94);text-shadow:0 2px 18px rgba(0,0,0,.7);opacity:0;transition:opacity .35s}
+
 /* ---------- Transport ---------- */
 .transport{display:flex;flex-direction:column;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
 .row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -114,7 +116,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .btn.primary{background:var(--fg);color:var(--bg);border-color:transparent;min-width:96px;justify-content:center}
 .btn:hover{border-color:var(--muted)}
 .btn[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
-button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .tc{font-family:var(--mono);font-size:14px;font-variant-numeric:tabular-nums;color:var(--muted);margin-left:auto}
 .tc b{color:var(--fg);font-weight:400}
 .track{position:relative}
@@ -137,7 +139,9 @@ ol.scenes li.on .t{color:var(--accent)}
 form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 form .full{grid-column:1/-1}
 label{display:flex;flex-direction:column;gap:5px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);min-width:0}
-input{font:inherit;font-size:15px;text-transform:none;letter-spacing:0;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 11px;width:100%;min-width:0}
+select{font:inherit;font-size:14px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:999px;height:38px;padding:0 12px;max-width:100%;min-width:0}
+.vo-msg{font-size:13px;color:var(--muted)}
+input,textarea{font:inherit;font-size:15px;text-transform:none;letter-spacing:0;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 11px;width:100%;min-width:0}
 .note{font-size:13px;color:var(--muted);margin:14px 0 0}
 @media (max-width:520px){form{grid-template-columns:1fr} .tc{margin-left:0;width:100%}}
 </style>
@@ -190,6 +194,7 @@ input{font:inherit;font-size:15px;text-transform:none;letter-spacing:0;color:var
       <div class="hud" id="hudTR">6 fichiers · 4 semaines</div>
       <div class="hud" id="hudBL"></div>
       <div class="hud" id="hudBR">00:00</div>
+      <div id="subs"></div>
       <div class="grain"></div>
     </div>
   </div>
@@ -201,6 +206,12 @@ input{font:inherit;font-size:15px;text-transform:none;letter-spacing:0;color:var
       <button class="btn" id="loop" type="button" aria-pressed="true">Boucle</button>
       <button class="btn" id="fs" type="button">Plein écran</button>
       <div class="tc"><b id="tcNow">00:00.0</b> / 00:40.0</div>
+    </div>
+    <div class="row">
+      <button class="btn" id="vo" type="button" aria-pressed="false">Activer la voix off</button>
+      <button class="btn" id="st" type="button" aria-pressed="false">Sous-titres</button>
+      <select id="voice" aria-label="Voix de lecture"></select>
+      <span class="vo-msg" id="voMsg"></span>
     </div>
     <div class="track">
       <input type="range" id="scrub" min="0" max="40000" step="10" value="0" aria-label="Position dans la séquence">
@@ -230,8 +241,14 @@ input{font:inherit;font-size:15px;text-transform:none;letter-spacing:0;color:var
         <label>Fichier 04<input id="f_n3" name="n3"></label><label>Durée 04<input id="f_t3" name="t3"></label>
         <label>Fichier 05<input id="f_n4" name="n4"></label><label>Durée 05<input id="f_t4" name="t4"></label>
         <label>Fichier 06<input id="f_n5" name="n5"></label><label>Durée 06<input id="f_t5" name="t5"></label>
+        <p class="note full" style="margin:6px 0 0">Voix off, une phrase par scène</p>
+        <label class="full">01 · Éveil (00:00)<textarea id="f_v0" name="v0" rows="2"></textarea></label>
+        <label class="full">02 · Titre (00:07)<textarea id="f_v1" name="v1" rows="2"></textarea></label>
+        <label class="full">03 · Le kit (00:15)<textarea id="f_v2" name="v2" rows="2"></textarea></label>
+        <label class="full">04 · Méthode (00:25)<textarea id="f_v3" name="v3" rows="2"></textarea></label>
+        <label class="full">05 · Signature (00:32)<textarea id="f_v4" name="v4" rows="2"></textarea></label>
       </form>
-      <p class="note">Les textes viennent de vos fichiers du kit. Vos modifications restent dans ce navigateur. Pour exporter en vidéo, passez en plein écran et enregistrez l'écran pendant 40 secondes.</p>
+      <p class="note">Les textes viennent de vos fichiers du kit. Vos modifications restent dans ce navigateur. Pour exporter en vidéo, passez en plein écran et enregistrez l'écran avec le son pendant 40 secondes. La voix dépend des voix françaises installées sur l'appareil.</p>
     </section>
   </div>
 </div>
@@ -255,7 +272,12 @@ input{font:inherit;font-size:15px;text-transform:none;letter-spacing:0;color:var
     n4:"Préparation d'entretien", t4:"1 h", d4:"Pitch de 60 s, 10 questions, checklist",
     n5:"Suivi des candidatures", t5:"2 min", d5:"Relances et taux de réponse calculés",
     stat:"30", unit:"", statLabel:"candidatures en 4 semaines",
-    cta:"Obtenir le kit", handle:"CV · Lettre · E-mails · Entretien · Suivi"
+    cta:"Obtenir le kit", handle:"CV · Lettre · E-mails · Entretien · Suivi",
+    v0:"Ton premier stage, sans aucune expérience ? Pas de panique.",
+    v1:"Voici le Kit Premier Stage. Décroche ton premier stage sans expérience, en quatre semaines.",
+    v2:"Six fichiers prêts à remplir : mode d'emploi, CV, lettre de motivation, e-mails, préparation d'entretien, et suivi des candidatures.",
+    v3:"La méthode : trente candidatures en quatre semaines. Dix, puis vingt, puis trente.",
+    v4:"Kit Premier Stage. CV, lettre, e-mails, entretien, suivi : tout est prêt. Obtiens le kit."
   };
   let txt = {...DEFAULTS};
   try { const s = JSON.parse(localStorage.getItem("kps-text") || "null"); if (s) txt = {...txt, ...s}; } catch(e){}
@@ -440,7 +462,7 @@ input{font:inherit;font-size:15px;text-transform:none;letter-spacing:0;color:var
   const markers=$("markers"), list=$("sceneList");
   SCENES.forEach((s,i)=>{
     const b=document.createElement("button"); b.type="button"; b.textContent=s.name; b.title=`Aller à ${s.name} (${fmt(s.from,false)})`;
-    b.addEventListener("click",()=>{ t=s.from+.001; frame(); }); markers.appendChild(b);
+    b.addEventListener("click",()=>{ t=s.from+.001; resync(); frame(); }); markers.appendChild(b);
     const li=document.createElement("li");
     li.innerHTML=`<div class="t">${fmt(s.from,false)} – ${fmt(s.to,false)}</div><div><strong></strong><span></span></div>`;
     li.querySelector("strong").textContent=s.name; li.querySelector("span").textContent=s.desc; list.appendChild(li);
@@ -454,16 +476,61 @@ input{font:inherit;font-size:15px;text-transform:none;letter-spacing:0;color:var
     [...markers.children].forEach((b,i)=>b.classList.toggle("on",i===idx));
     [...list.children].forEach((li,i)=>li.classList.toggle("on",i===idx));
   }
-  function frame(){ render(t); syncUI(); }
+  // ---------- voice-over ----------
+  const CUES = [0.5, 7.6, 15.6, 25.4, 32.8];
+  const synth = window.speechSynthesis;
+  let voOn = false, subsOn = false, lastCue = -1, voice = null;
+  const voBtn=$("vo"), stBtn=$("st"), voiceSel=$("voice"), voMsg=$("voMsg"), subs=$("subs");
+  const cueAt = tt => { let c=-1; CUES.forEach((s,i)=>{ if(tt>=s) c=i; }); return c; };
+  const say = i => {
+    if(!voOn || !synth) return;
+    try{ synth.cancel(); const u=new SpeechSynthesisUtterance(txt["v"+i]||""); u.lang="fr-FR"; if(voice){u.voice=voice; u.lang=voice.lang;} u.rate=1.02; synth.speak(u); }catch(e){}
+  };
+  const hush = () => { try{ synth && synth.cancel(); }catch(e){} };
+  const resync = () => { hush(); const c=cueAt(t); lastCue = (c>=0 && t-CUES[c]<1.2) ? c-1 : c; };
+  function loadVoices(){
+    if(!synth){ voiceSel.hidden=true; voBtn.disabled=true; voMsg.textContent="La synthèse vocale n'est pas disponible dans ce navigateur."; return; }
+    const all = synth.getVoices(); const fr = all.filter(v=>/^fr/i.test(v.lang));
+    const list = fr.length ? fr : all;
+    const score = v => (/natural|neural|online|premium|enhanced/i.test(v.name)?4:0) + (/google|microsoft|amélie|amelie|thomas|audrey|marie|denise|henri/i.test(v.name)?2:0) + (/fr-FR/i.test(v.lang)?1:0);
+    list.sort((a,b)=>score(b)-score(a));
+    const prev = voice && voice.name;
+    voiceSel.innerHTML="";
+    list.forEach((v,i)=>{ const o=document.createElement("option"); o.value=i; o.textContent=`${v.name} (${v.lang})`; voiceSel.appendChild(o); });
+    const keep = list.findIndex(v=>v.name===prev);
+    voice = list[keep>=0?keep:0] || null; voiceSel.value = String(keep>=0?keep:0);
+    voiceSel._list = list; voiceSel.hidden = !list.length;
+    voMsg.textContent = !all.length ? "" : (fr.length ? "" : "Aucune voix française sur cet appareil : la lecture utilisera une autre voix.");
+  }
+  if(synth){ loadVoices(); synth.addEventListener?.("voiceschanged", loadVoices); }
+  else loadVoices();
+  voiceSel.addEventListener("change",()=>{ voice = voiceSel._list?.[+voiceSel.value] || null; });
+  voBtn.addEventListener("click",()=>{
+    voOn=!voOn; voBtn.setAttribute("aria-pressed",String(voOn)); voBtn.textContent = voOn ? "Voix off activée" : "Activer la voix off";
+    hush(); if(voOn){ t=0; lastCue=-1; playing=true; } frame();
+  });
+  stBtn.addEventListener("click",()=>{ subsOn=!subsOn; stBtn.setAttribute("aria-pressed",String(subsOn)); frame(); });
+  function voiceFrame(){
+    const c=cueAt(t);
+    if(playing && c!==lastCue){ lastCue=c; if(c>=0 && t-CUES[c]<1.2) say(c); }
+    let o=0;
+    if(subsOn && c>=0){
+      const line = txt["v"+c]||"", end = Math.min(CUES[c]+.8+line.split(/\s+/).length/2.5, CUES[c+1]??DUR);
+      if(t<end){ o=1; if(subs.textContent!==line) subs.textContent=line; }
+    }
+    subs.style.opacity=o;
+  }
+
+  function frame(){ render(t); syncUI(); voiceFrame(); }
   function tick(now){
     const dt = Math.min(.1,(now-last)/1000); last = now;
-    if (playing){ t += dt; if (t>=DUR){ if (loop) t -= DUR; else { t = DUR; playing=false; } } frame(); }
+    if (playing){ t += dt; if (t>=DUR){ if (loop) { t -= DUR; lastCue=-1; } else { t = DUR; playing=false; } } frame(); }
     requestAnimationFrame(tick);
   }
-  playBtn.addEventListener("click",()=>{ if(!playing && t>=DUR) t=0; playing=!playing; frame(); });
-  $("restart").addEventListener("click",()=>{ t=0; frame(); });
+  playBtn.addEventListener("click",()=>{ if(!playing && t>=DUR) t=0; playing=!playing; if(playing) resync(); else hush(); frame(); });
+  $("restart").addEventListener("click",()=>{ t=0; resync(); frame(); });
   loopBtn.addEventListener("click",()=>{ loop=!loop; loopBtn.setAttribute("aria-pressed",String(loop)); });
-  scrub.addEventListener("input",()=>{ t=scrub.value/1000; frame(); });
+  scrub.addEventListener("input",()=>{ t=scrub.value/1000; resync(); frame(); });
   $("fs").addEventListener("click",()=>{ const p = document.fullscreenElement ? document.exitFullscreen() : wrap.requestFullscreen?.(); p && p.catch && p.catch(()=>{}); });
   document.addEventListener("keydown",e=>{ if(e.code==="Space" && !/INPUT|TEXTAREA|BUTTON/.test(e.target.tagName)){ e.preventDefault(); playBtn.click(); } });
 
