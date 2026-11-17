@@ -195,6 +195,7 @@ input,textarea{font:inherit;font-size:15px;text-transform:none;letter-spacing:0;
       <div class="hud" id="hudBL"></div>
       <div class="hud" id="hudBR">00:00</div>
       <div id="subs"></div>
+      <audio id="vAudio" src="voix-off.mp3" preload="auto"></audio>
       <div class="grain"></div>
     </div>
   </div>
@@ -248,7 +249,7 @@ input,textarea{font:inherit;font-size:15px;text-transform:none;letter-spacing:0;
         <label class="full">04 · Méthode (00:25)<textarea id="f_v3" name="v3" rows="2"></textarea></label>
         <label class="full">05 · Signature (00:32)<textarea id="f_v4" name="v4" rows="2"></textarea></label>
       </form>
-      <p class="note">Les textes viennent de vos fichiers du kit. Vos modifications restent dans ce navigateur. Pour exporter en vidéo, passez en plein écran et enregistrez l'écran avec le son pendant 40 secondes. La voix dépend des voix françaises installées sur l'appareil.</p>
+      <p class="note">Les textes viennent de vos fichiers du kit. Vos modifications restent dans ce navigateur. Pour exporter en vidéo, passez en plein écran et enregistrez l'écran avec le son pendant 40 secondes. La voix studio est un fichier audio de 40 secondes calé sur l'animation.</p>
     </section>
   </div>
 </div>
@@ -479,40 +480,48 @@ input,textarea{font:inherit;font-size:15px;text-transform:none;letter-spacing:0;
   // ---------- voice-over ----------
   const CUES = [0.5, 7.6, 15.6, 25.4, 32.8];
   const synth = window.speechSynthesis;
-  let voOn = false, subsOn = false, lastCue = -1, voice = null;
+  const audio = $("vAudio");
+  let voOn = false, subsOn = false, lastCue = -1, voice = null, mode = "studio";
   const voBtn=$("vo"), stBtn=$("st"), voiceSel=$("voice"), voMsg=$("voMsg"), subs=$("subs");
   const cueAt = tt => { let c=-1; CUES.forEach((s,i)=>{ if(tt>=s) c=i; }); return c; };
   const say = i => {
-    if(!voOn || !synth) return;
+    if(!voOn || mode!=="synth" || !synth) return;
     try{ synth.cancel(); const u=new SpeechSynthesisUtterance(txt["v"+i]||""); u.lang="fr-FR"; if(voice){u.voice=voice; u.lang=voice.lang;} u.rate=1.02; synth.speak(u); }catch(e){}
   };
-  const hush = () => { try{ synth && synth.cancel(); }catch(e){} };
+  const hush = () => { try{ synth && synth.cancel(); }catch(e){} try{ audio.pause(); }catch(e){} };
   const resync = () => { hush(); const c=cueAt(t); lastCue = (c>=0 && t-CUES[c]<1.2) ? c-1 : c; };
+  let synthList = [];
   function loadVoices(){
-    if(!synth){ voiceSel.hidden=true; voBtn.disabled=true; voMsg.textContent="La synthèse vocale n'est pas disponible dans ce navigateur."; return; }
-    const all = synth.getVoices(); const fr = all.filter(v=>/^fr/i.test(v.lang));
-    const list = fr.length ? fr : all;
+    const all = synth ? synth.getVoices() : []; const fr = all.filter(v=>/^fr/i.test(v.lang));
     const score = v => (/natural|neural|online|premium|enhanced/i.test(v.name)?4:0) + (/google|microsoft|amélie|amelie|thomas|audrey|marie|denise|henri/i.test(v.name)?2:0) + (/fr-FR/i.test(v.lang)?1:0);
-    list.sort((a,b)=>score(b)-score(a));
-    const prev = voice && voice.name;
-    voiceSel.innerHTML="";
-    list.forEach((v,i)=>{ const o=document.createElement("option"); o.value=i; o.textContent=`${v.name} (${v.lang})`; voiceSel.appendChild(o); });
-    const keep = list.findIndex(v=>v.name===prev);
-    voice = list[keep>=0?keep:0] || null; voiceSel.value = String(keep>=0?keep:0);
-    voiceSel._list = list; voiceSel.hidden = !list.length;
-    voMsg.textContent = !all.length ? "" : (fr.length ? "" : "Aucune voix française sur cet appareil : la lecture utilisera une autre voix.");
+    synthList = fr.sort((a,b)=>score(b)-score(a));
+    const cur = voiceSel.value || "studio";
+    voiceSel.innerHTML = "";
+    const o0=document.createElement("option"); o0.value="studio"; o0.textContent="Voix studio (fichier audio)"; voiceSel.appendChild(o0);
+    synthList.forEach((v,i)=>{ const o=document.createElement("option"); o.value=String(i); o.textContent=`Navigateur : ${v.name}`; voiceSel.appendChild(o); });
+    voiceSel.value = [...voiceSel.options].some(o=>o.value===cur) ? cur : "studio";
+    applyMode();
   }
-  if(synth){ loadVoices(); synth.addEventListener?.("voiceschanged", loadVoices); }
-  else loadVoices();
-  voiceSel.addEventListener("change",()=>{ voice = voiceSel._list?.[+voiceSel.value] || null; });
+  function applyMode(){
+    mode = voiceSel.value==="studio" ? "studio" : "synth";
+    voice = mode==="synth" ? synthList[+voiceSel.value] : null;
+    voMsg.textContent = mode==="studio" ? "Le fichier studio lit le texte d'origine. Un texte modifié n'est lu qu'avec une voix du navigateur." : "";
+    hush(); resync();
+  }
+  loadVoices(); if(synth && synth.addEventListener) synth.addEventListener("voiceschanged", loadVoices);
+  voiceSel.addEventListener("change", applyMode);
   voBtn.addEventListener("click",()=>{
     voOn=!voOn; voBtn.setAttribute("aria-pressed",String(voOn)); voBtn.textContent = voOn ? "Voix off activée" : "Activer la voix off";
-    hush(); if(voOn){ t=0; lastCue=-1; playing=true; } frame();
+    hush(); if(voOn){ t=0; lastCue=-1; playing=true; if(mode==="studio"){ try{ audio.currentTime=0; audio.play().catch(()=>{}); }catch(e){} } } frame();
   });
   stBtn.addEventListener("click",()=>{ subsOn=!subsOn; stBtn.setAttribute("aria-pressed",String(subsOn)); frame(); });
   function voiceFrame(){
     const c=cueAt(t);
     if(playing && c!==lastCue){ lastCue=c; if(c>=0 && t-CUES[c]<1.2) say(c); }
+    if(voOn && mode==="studio" && playing && t<DUR){
+      if(audio.paused){ try{ audio.currentTime=t; audio.play().catch(()=>{}); }catch(e){} }
+      else if(Math.abs(audio.currentTime-t)>.25){ audio.currentTime=t; }
+    } else if(!audio.paused) audio.pause();
     let o=0;
     if(subsOn && c>=0){
       const line = txt["v"+c]||"", end = Math.min(CUES[c]+.8+line.split(/\s+/).length/2.5, CUES[c+1]??DUR);
