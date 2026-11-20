@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+</head>
+<body>
+<title>Liquid Glass Motion</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+/* Layout: one 16:9 stage (1920×1080, scaled to fit) with a transport bar, then the scene list and the text editor side by side. */
+:root{
+  --bg:#EDF0F4; --surface:#FFFFFF; --fg:#12151C; --muted:#5B6474; --line:rgba(18,21,28,.12); --accent:#3D63C9;
+  --display:"Sora", "Helvetica Neue", Arial, sans-serif;
+  --body:"Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --bg:#090B10; --surface:#12151D; --fg:#E7EBF2; --muted:#8B94A7; --line:rgba(231,235,242,.12); --accent:#9DBBFF; color-scheme:dark }
+}
+:root[data-theme="dark"]{ --bg:#090B10; --surface:#12151D; --fg:#E7EBF2; --muted:#8B94A7; --line:rgba(231,235,242,.12); --accent:#9DBBFF; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.55;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:28px 56px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 24px}
+h1{font-family:var(--display);font-weight:300;font-size:clamp(26px,4vw,38px);letter-spacing:-.02em;margin:0;text-wrap:balance}
+header p{margin:0;color:var(--muted);max-width:60ch}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+
+/* ---------- Stage ---------- */
+.stage-wrap{position:relative;width:100%;max-width:100%;aspect-ratio:16/9;border-radius:18px;overflow:hidden;background:#07080C;
+  box-shadow:0 1px 0 var(--line), 0 30px 80px -30px rgba(0,0,0,.45)}
+.stage-wrap:fullscreen{border-radius:0}
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;
+  background:#07080C;color:#F4F6FA;font-family:var(--display);contain:strict}
+.blob{position:absolute;border-radius:50%;pointer-events:none;will-change:transform}
+.b1{width:1300px;height:1300px;background:radial-gradient(circle,rgba(132,176,255,.55),rgba(132,176,255,0) 62%)}
+.b2{width:1100px;height:1100px;background:radial-gradient(circle,rgba(196,178,255,.5),rgba(196,178,255,0) 62%)}
+.b3{width:900px;height:900px;background:radial-gradient(circle,rgba(244,228,210,.32),rgba(244,228,210,0) 62%)}
+.b4{width:760px;height:760px;background:radial-gradient(circle,rgba(118,222,210,.3),rgba(118,222,210,0) 62%)}
+.vignette{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(7,8,12,0) 40%,rgba(7,8,12,.75) 100%);pointer-events:none}
+.grain{position:absolute;inset:0;opacity:.06;mix-blend-mode:overlay;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* Liquid glass material */
+.glass{position:absolute;isolation:isolate;
+  background:linear-gradient(160deg,rgba(255,255,255,.16),rgba(255,255,255,.04) 45%,rgba(255,255,255,.08));
+  -webkit-backdrop-filter:blur(28px) saturate(185%) brightness(1.06);backdrop-filter:blur(28px) saturate(185%) brightness(1.06);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255,255,255,.55),
+    inset 0 -1px 0 rgba(255,255,255,.12),
+    inset 0 0 0 1px rgba(255,255,255,.16),
+    inset 0 18px 40px -22px rgba(255,255,255,.35),
+    0 40px 80px -30px rgba(0,0,0,.55);
+  --sheen:-120%}
+.glass::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:2;
+  background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.28) 46%,rgba(255,255,255,.06) 54%,transparent 66%);
+  background-size:250% 100%;background-repeat:no-repeat;background-position:var(--sheen) 0;mix-blend-mode:screen}
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:1;
+  background:radial-gradient(120% 70% at 30% 0%,rgba(255,255,255,.22),transparent 55%)}
+
+.abs{position:absolute;left:0;top:0;will-change:transform,opacity,filter}
+#orb{left:960px;top:540px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#orbText{position:relative;z-index:3;font-family:var(--body);font-weight:500;text-transform:uppercase;white-space:nowrap;color:rgba(244,246,250,.92)}
+
+.titleLayer{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:40px}
+.titleText{font-family:var(--display);font-weight:200;font-size:210px;letter-spacing:-.045em;line-height:1;white-space:nowrap}
+.titleText span{display:inline-block;will-change:transform,opacity,filter}
+.tagline{margin-top:34px;font-family:var(--body);font-size:30px;font-weight:400;color:rgba(244,246,250,.72);letter-spacing:.02em}
+
+#lens{width:330px;height:330px;border-radius:50%;overflow:hidden}
+#lensInner{position:absolute;width:1920px;height:1080px}
+#lensInner .titleText, #lensInner .tagline{text-shadow:-1.5px 0 rgba(255,140,190,.55),1.5px 0 rgba(120,200,255,.6)}
+
+.card{width:420px;height:500px;border-radius:44px;padding:44px 42px;display:flex;flex-direction:column}
+.card > *{position:relative;z-index:3}
+.card .idx{font-family:var(--mono);font-size:20px;color:rgba(244,246,250,.55);letter-spacing:.08em}
+.card .dot{width:58px;height:58px;border-radius:50%;margin-top:auto;margin-bottom:34px;
+  background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.95),rgba(255,255,255,.25) 40%,rgba(255,255,255,.05) 70%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.35),0 10px 30px -8px rgba(160,190,255,.6)}
+.card h3{margin:0;font-family:var(--display);font-weight:300;font-size:62px;letter-spacing:-.03em;line-height:1}
+.card p{margin:18px 0 0;font-family:var(--body);font-size:24px;line-height:1.4;color:rgba(244,246,250,.68)}
+
+#ring{left:960px;top:540px;width:600px;height:600px;margin:-300px 0 0 -300px}
+#ringGlass{position:absolute;inset:0;border-radius:50%;
+  -webkit-mask:radial-gradient(circle,transparent 0 63%,#000 63.6%);mask:radial-gradient(circle,transparent 0 63%,#000 63.6%)}
+#ringSheen{position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(from 0deg,transparent 0 60%,rgba(255,255,255,.45) 72%,transparent 82%);
+  -webkit-mask:radial-gradient(circle,transparent 0 63%,#000 63.6%,#000 99%,transparent 100%);mask:radial-gradient(circle,transparent 0 63%,#000 63.6%,#000 99%,transparent 100%);mix-blend-mode:screen}
+#ringSvg{position:absolute;inset:0;overflow:visible}
+#ringCenter{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#statNum{font-family:var(--display);font-weight:200;font-size:200px;letter-spacing:-.05em;line-height:1;font-variant-numeric:tabular-nums}
+#statNum small{font-size:64px;font-weight:300;letter-spacing:0;margin-left:6px;color:rgba(244,246,250,.7)}
+#statLabel{margin-top:14px;font-family:var(--body);font-size:20px;letter-spacing:.24em;text-transform:uppercase;color:rgba(244,246,250,.66)}
+
+#pill{left:960px;top:480px;width:680px;height:132px;margin:-66px 0 0 -340px;border-radius:66px;display:flex;align-items:center;justify-content:space-between;padding:0 18px 0 52px}
+#pill > *{position:relative;z-index:3}
+#pillName{font-family:var(--display);font-weight:300;font-size:54px;letter-spacing:-.03em}
+#pillCta{height:96px;padding:0 40px;border-radius:48px;display:flex;align-items:center;gap:14px;font-family:var(--body);font-size:26px;font-weight:500;
+  color:#0B0D12;background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(232,238,250,.86));box-shadow:inset 0 -2px 0 rgba(0,0,0,.08),0 12px 30px -10px rgba(170,195,255,.7)}
+#rule{left:960px;top:620px;height:1px;width:760px;margin-left:-380px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);transform-origin:50% 50%}
+#handle{left:0;top:654px;width:1920px;text-align:center;font-family:var(--mono);font-size:22px;letter-spacing:.18em;color:rgba(244,246,250,.6)}
+
+.hud{position:absolute;font-family:var(--mono);font-size:17px;letter-spacing:.16em;text-transform:uppercase;color:rgba(244,246,250,.5)}
+#hudTL{left:72px;top:60px} #hudTR{right:72px;top:60px;text-align:right}
+#hudBL{left:72px;bottom:60px} #hudBR{right:72px;bottom:60px;text-align:right;font-variant-numeric:tabular-nums}
+
+/* ---------- Transport ---------- */
+.transport{display:flex;flex-direction:column;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+button{font:inherit;color:inherit;cursor:pointer}
+.btn{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:transparent}
+.btn.primary{background:var(--fg);color:var(--bg);border-color:transparent;min-width:96px;justify-content:center}
+.btn:hover{border-color:var(--muted)}
+.btn[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tc{font-family:var(--mono);font-size:14px;font-variant-numeric:tabular-nums;color:var(--muted);margin-left:auto}
+.tc b{color:var(--fg);font-weight:400}
+.track{position:relative}
+#scrub{width:100%;accent-color:var(--accent);margin:0}
+.markers{display:grid;grid-template-columns:7fr 8fr 10fr 7fr 8fr;margin-top:6px}
+.markers button{border:0;border-left:1px solid var(--line);background:transparent;text-align:left;padding:2px 8px;font-size:12px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.markers button.on{color:var(--fg)}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media (max-width:820px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;min-width:0}
+.panel h2{margin:0 0 14px;font-family:var(--display);font-weight:300;font-size:22px;letter-spacing:-.01em}
+ol.scenes{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+ol.scenes li{display:grid;grid-template-columns:96px 1fr;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+ol.scenes li:first-child{border-top:0}
+ol.scenes .t{font-family:var(--mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+ol.scenes strong{font-weight:500;display:block}
+ol.scenes span{color:var(--muted);font-size:14px}
+ol.scenes li.on .t{color:var(--accent)}
+form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+form .full{grid-column:1/-1}
+label{display:flex;flex-direction:column;gap:5px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);min-width:0}
+input{font:inherit;font-size:15px;text-transform:none;letter-spacing:0;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 11px;width:100%;min-width:0}
+.note{font-size:13px;color:var(--muted);margin:14px 0 0}
+@media (max-width:520px){form{grid-template-columns:1fr} .tc{margin-left:0;width:100%}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">Motion design · 1 stage · 00:40</div>
+      <h1>Liquid Glass Motion</h1>
+    </div>
+    <p>Une séquence de 40 secondes en verre liquide, en cinq scènes. Modifiez les textes en bas de page : l'animation se met à jour en direct.</p>
+  </header>
+
+  <div class="stage-wrap" id="stageWrap">
+    <div id="stage" aria-label="Animation de 40 secondes">
+      <div class="blob b1" id="b1"></div><div class="blob b2" id="b2"></div><div class="blob b3" id="b3"></div><div class="blob b4" id="b4"></div>
+      <div class="vignette"></div>
+
+      <div class="titleLayer abs" id="titleLayer" style="width:1920px;height:1080px">
+        <div class="titleText" id="titleText"></div>
+        <div class="tagline" id="tagline"></div>
+      </div>
+
+      <div class="glass abs" id="orb"><div id="orbText"></div></div>
+
+      <div class="glass abs" id="lens"><div id="lensInner"></div></div>
+
+      <div class="glass abs card" id="c0"><div class="idx">01</div><div class="dot"></div><h3></h3><p></p></div>
+      <div class="glass abs card" id="c1"><div class="idx">02</div><div class="dot"></div><h3></h3><p></p></div>
+      <div class="glass abs card" id="c2"><div class="idx">03</div><div class="dot"></div><h3></h3><p></p></div>
+
+      <div class="abs" id="ring">
+        <div class="glass" id="ringGlass"></div>
+        <div id="ringSheen"></div>
+        <svg id="ringSvg" viewBox="0 0 600 600" aria-hidden="true">
+          <circle cx="300" cy="300" r="250" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="2"/>
+          <circle id="arc" cx="300" cy="300" r="250" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" transform="rotate(-90 300 300)" stroke-dasharray="1570.8" stroke-dashoffset="1570.8"/>
+        </svg>
+        <div id="ringCenter"><div id="statNum">0</div><div id="statLabel"></div></div>
+      </div>
+
+      <div class="glass abs" id="pill"><div id="pillName"></div><div id="pillCta"><span id="ctaText"></span><span aria-hidden="true">→</span></div></div>
+      <div class="abs" id="rule"></div>
+      <div class="abs" id="handle"></div>
+
+      <div class="hud" id="hudTL"></div>
+      <div class="hud" id="hudTR">Liquid Glass</div>
+      <div class="hud" id="hudBL"></div>
+      <div class="hud" id="hudBR">00:00</div>
+      <div class="grain"></div>
+    </div>
+  </div>
+
+  <div class="transport">
+    <div class="row">
+      <button class="btn primary" id="play" type="button">Pause</button>
+      <button class="btn" id="restart" type="button">Revenir au début</button>
+      <button class="btn" id="loop" type="button" aria-pressed="true">Boucle</button>
+      <button class="btn" id="fs" type="button">Plein écran</button>
+      <div class="tc"><b id="tcNow">00:00.0</b> / 00:40.0</div>
+    </div>
+    <div class="track">
+      <input type="range" id="scrub" min="0" max="40000" step="10" value="0" aria-label="Position dans la séquence">
+      <div class="markers" id="markers"></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <section class="panel">
+      <h2>Découpage</h2>
+      <ol class="scenes" id="sceneList"></ol>
+    </section>
+    <section class="panel">
+      <h2>Textes</h2>
+      <form id="form" autocomplete="off">
+        <label>Nom du projet<input id="f_name" name="name"></label>
+        <label>Accroche d'ouverture<input id="f_kicker" name="kicker"></label>
+        <label class="full">Signature<input id="f_tagline" name="tagline"></label>
+        <label>Pilier 1<input id="f_p1" name="p1"></label>
+        <label>Détail 1<input id="f_d1" name="d1"></label>
+        <label>Pilier 2<input id="f_p2" name="p2"></label>
+        <label>Détail 2<input id="f_d2" name="d2"></label>
+        <label>Pilier 3<input id="f_p3" name="p3"></label>
+        <label>Détail 3<input id="f_d3" name="d3"></label>
+        <label>Chiffre clé<input id="f_stat" name="stat" inputmode="numeric"></label>
+        <label>Unité<input id="f_unit" name="unit"></label>
+        <label class="full">Légende du chiffre<input id="f_statLabel" name="statLabel"></label>
+        <label>Bouton final<input id="f_cta" name="cta"></label>
+        <label>Adresse / handle<input id="f_handle" name="handle"></label>
+      </form>
+      <p class="note">Les textes d'exemple sont à remplacer. Vos modifications restent dans ce navigateur. Pour exporter en vidéo, passez en plein écran et enregistrez l'écran pendant 40 secondes.</p>
+    </section>
+  </div>
+</div>
+
+<script>
+(() => {
+  const DUR = 40;
+  const SCENES = [
+    {name:"Éveil",     from:0,  to:7,  desc:"Une goutte de verre se forme, ondule, puis s'étire en capsule."},
+    {name:"Titre",     from:7,  to:15, desc:"Le nom apparaît lettre par lettre ; une lentille le traverse et le grossit."},
+    {name:"Piliers",   from:15, to:25, desc:"Trois cartes de verre montent en cascade, un reflet les balaie."},
+    {name:"Chiffre",   from:25, to:32, desc:"Un anneau de verre se trace autour du chiffre clé."},
+    {name:"Signature", from:32, to:40, desc:"Capsule finale avec le nom et l'appel à l'action, puis fondu."}
+  ];
+  const DEFAULTS = {
+    name:"Lumen", kicker:"Présente", tagline:"La clarté, en mouvement.",
+    p1:"Épuré", d1:"L'essentiel, rien de plus.",
+    p2:"Fluide", d2:"Chaque transition respire.",
+    p3:"Précis", d3:"Un rythme calé à l'image près.",
+    stat:"40", unit:"s", statLabel:"secondes de mouvement",
+    cta:"Découvrir", handle:"lumen.studio"
+  };
+  let txt = {...DEFAULTS};
+  try { const s = JSON.parse(localStorage.getItem("lgm-text") || "null"); if (s) txt = {...txt, ...s}; } catch(e){}
+
+  // ---------- helpers ----------
+  const $ = id => document.getElementById(id);
+  const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
+  const mix = (a,b,k) => a + (b-a)*k;
+  const E = {
+    lin: x=>x,
+    outExpo: x=> x===1?1:1-Math.pow(2,-10*x),
+    outCubic: x=>1-Math.pow(1-x,3),
+    inCubic: x=>x*x*x,
+    inOut: x=> x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2,
+    inOutSine: x=>-(Math.cos(Math.PI*x)-1)/2,
+    outBack: x=>{const c1=1.45,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2);}
+  };
+  const P = (t,a,b,e=E.lin) => e(clamp((t-a)/(b-a),0,1));
+  const W = Math.PI*2/DUR; // loop-perfect angular speed
+
+  // ---------- elements ----------
+  const stage=$("stage"), wrap=$("stageWrap");
+  const orb=$("orb"), orbText=$("orbText"), titleLayer=$("titleLayer"), titleText=$("titleText"), tagline=$("tagline");
+  const lens=$("lens"), lensInner=$("lensInner");
+  const cards=[$("c0"),$("c1"),$("c2")];
+  const ring=$("ring"), ringSheen=$("ringSheen"), arc=$("arc"), statNum=$("statNum"), statLabel=$("statLabel");
+  const pill=$("pill"), pillName=$("pillName"), ctaText=$("ctaText"), rule=$("rule"), handle=$("handle");
+  const hud=[$("hudTL"),$("hudTR"),$("hudBL"),$("hudBR")];
+  const blobs=[$("b1"),$("b2"),$("b3"),$("b4")];
+  let chars=[];
+
+  function applyText(){
+    orbText.textContent = txt.kicker;
+    titleText.innerHTML = "";
+    [...(txt.name||" ")].forEach(ch => { const s=document.createElement("span"); s.textContent = ch===" " ? " " : ch; titleText.appendChild(s); });
+    chars = [...titleText.children];
+    tagline.textContent = txt.tagline;
+    lensInner.innerHTML = "";
+    const clone = titleLayer.cloneNode(true); clone.removeAttribute("id"); clone.style.cssText="position:absolute;inset:0;display:flex";
+    clone.querySelectorAll("[id]").forEach(n=>n.removeAttribute("id"));
+    clone.querySelectorAll("span").forEach(s=>{s.style.cssText=""});
+    clone.querySelector(".tagline").style.cssText="";
+    lensInner.appendChild(clone);
+    [[txt.p1,txt.d1],[txt.p2,txt.d2],[txt.p3,txt.d3]].forEach(([h,p],i)=>{ cards[i].querySelector("h3").textContent=h; cards[i].querySelector("p").textContent=p; });
+    statLabel.textContent = txt.statLabel;
+    pillName.textContent = txt.name; ctaText.textContent = txt.cta; handle.textContent = txt.handle;
+    hud[0].textContent = txt.name;
+  }
+
+  function show(el, o){ el.style.opacity = o; el.style.visibility = o<=0.001 ? "hidden" : "visible"; }
+
+  // ---------- render one frame at time t (seconds) ----------
+  function render(t){
+    // ambient field — periods divide 40s so the loop is seamless
+    const bp = [[620,380,1,.9],[1360,700,2,1.1],[980,260,1,1.4],[1500,240,3,.7]];
+    blobs.forEach((b,i)=>{
+      const [cx,cy,n,a]=bp[i], s=b.offsetWidth/2;
+      const x = cx + Math.sin(t*W*n + i*1.7)*260*a - s;
+      const y = cy + Math.cos(t*W*n + i*2.3)*170*a - s;
+      b.style.transform = `translate(${x}px,${y}px) scale(${1+.08*Math.sin(t*W*2+i)})`;
+    });
+
+    // HUD
+    const hudO = .55*P(t,.8,1.8,E.inOut)*(1-P(t,38.4,39.4,E.inOut));
+    hud.forEach(h=>h.style.opacity=hudO);
+    const sc = SCENES.find(s=>t>=s.from && t<s.to) || SCENES[4];
+    hud[2].textContent = `${String(SCENES.indexOf(sc)+1).padStart(2,"0")} — ${sc.name}`;
+    hud[3].textContent = fmt(t,false)+" / 00:40";
+
+    // ---- Scene 1 → 2 : orb becomes the kicker capsule ----
+    {
+      const kIn = P(t,.6,2.2,E.outBack), kPill = P(t,4,5.6,E.inOut), kUp = P(t,6.6,7.8,E.inOut), kOut = P(t,14,15,E.inCubic);
+      let w = mix(260,620,kPill), h = mix(260,128,kPill);
+      w = mix(w,300,kUp); h = mix(h,64,kUp);
+      const cy = mix(540, 318, kUp) - 40*kOut;
+      const wob = (1-kPill)*.14, r = Math.min(w,h)/2;
+      const q = a => (r*(1+wob*Math.sin(t*2.4+a))).toFixed(1)+"px";
+      orb.style.width=w+"px"; orb.style.height=h+"px";
+      orb.style.borderRadius = `${q(0)} ${q(1.3)} ${q(2.6)} ${q(3.9)} / ${q(5.2)} ${q(.6)} ${q(1.9)} ${q(3.2)}`;
+      orb.style.transform = `translate(-50%,-50%) translate(0,${cy-540}px) scale(${kIn}) rotate(${(1-kPill)*Math.sin(t*1.1)*8}deg)`;
+      orb.style.setProperty("--sheen", mix(-120,220,P(t,2.4,4.2,E.inOutSine))+"%");
+      orb.style.filter = kOut>0 ? `blur(${10*kOut}px)` : "none";
+      show(orb, Math.min(1, kIn*1.4) * (1-kOut));
+      const kt = P(t,5.3,6.3,E.outCubic);
+      orbText.style.opacity = kt;
+      orbText.style.fontSize = mix(30,17,kUp)+"px";
+      orbText.style.letterSpacing = mix(.7,.34,kt)+"em";
+    }
+
+    // ---- Scene 2 : title + lens ----
+    {
+      const kOut = P(t,14,15,E.inCubic);
+      chars.forEach((c,i)=>{
+        const k = P(t,7.5+i*.07,8.7+i*.07,E.outExpo);
+        c.style.opacity = k; c.style.transform = `translateY(${(1-k)*60}px)`; c.style.filter = k<1?`blur(${(1-k)*14}px)`:"none";
+      });
+      const kt = P(t,10.2,11.6,E.outCubic);
+      tagline.style.opacity = kt; tagline.style.transform = `translateY(${(1-kt)*22}px)`; tagline.style.letterSpacing = mix(.14,.02,kt)+"em";
+      titleLayer.style.transform = `translateY(${-30*kOut}px) scale(${1-.03*kOut})`;
+      titleLayer.style.filter = kOut>0?`blur(${12*kOut}px)`:"none";
+      show(titleLayer, (t>7.3?1:0)*(1-kOut));
+
+      const kL = P(t,9.2,9.9,E.outCubic)*(1-P(t,13.1,13.8,E.inCubic));
+      const D = 330, cx = mix(560,1360,P(t,9.3,13.7,E.inOutSine)), cy = 560 + Math.sin(t*1.6)*26;
+      const L = cx-D/2, T = cy-D/2;
+      lens.style.transform = `translate(${L}px,${T}px) scale(${mix(.55,1,kL)})`;
+      lens.style.setProperty("--sheen", mix(-60,120,P(t,9.3,13.7))+"%");
+      lensInner.style.transform = `translate(${-L}px,${-T}px)`;
+      lensInner.firstChild && (lensInner.firstChild.style.transformOrigin = `${cx}px ${cy}px`, lensInner.firstChild.style.transform = `scale(1.24)`);
+      show(lens, kL);
+    }
+
+    // ---- Scene 3 : pillars ----
+    cards.forEach((c,i)=>{
+      const kIn = P(t,15.2+i*.32,16.8+i*.32,E.outExpo);
+      const kOut = P(t,23.7+(i===1?.15:0),24.9,E.inOut);
+      const baseX = 960 + (i-1)*480 - 210, baseY = 560 - 250;
+      const x = mix(baseX, 960-210, kOut);
+      const y = baseY + (1-kIn)*180 + Math.sin(t*1.1+i*1.4)*7;
+      const s = mix(.9,1,kIn) * mix(1,.35,kOut);
+      c.style.transform = `translate(${x}px,${y}px) scale(${s})`;
+      c.style.filter = (kIn<1||kOut>0) ? `blur(${(1-kIn)*14 + kOut*16}px)` : "none";
+      c.style.setProperty("--sheen", mix(-120,220,P(t,18.6+i*.28,20.6+i*.28,E.inOutSine))+"%");
+      const kc = P(t,16+i*.32,17.2+i*.32,E.outCubic);
+      [...c.children].forEach((n,j)=>{ n.style.opacity = P(t,15.9+i*.32+j*.08,17+i*.32+j*.08,E.outCubic); n.style.transform=`translateY(${(1-kc)*14}px)`; });
+      show(c, kIn*(1-kOut));
+    });
+
+    // ---- Scene 4 : key figure ring ----
+    {
+      const kIn = P(t,24.9,26.4,E.outExpo), kOut = P(t,31,32,E.inCubic);
+      ring.style.transform = `scale(${mix(.72,1,kIn)*mix(1,1.12,kOut)})`;
+      ring.style.filter = (kIn<1||kOut>0)?`blur(${(1-kIn)*16+kOut*14}px)`:"none";
+      show(ring, kIn*(1-kOut));
+      const kA = P(t,25.6,29.2,E.inOut);
+      arc.setAttribute("stroke-dashoffset", (1570.8*(1-kA)).toFixed(1));
+      ringSheen.style.transform = `rotate(${t*W*3*57.2958}deg)`;
+      const target = parseFloat(String(txt.stat).replace(",", ".")) || 0;
+      const dec = (String(txt.stat).split(/[.,]/)[1]||"").length;
+      const v = target*P(t,25.6,29.2,E.outCubic);
+      statNum.innerHTML = `${v.toFixed(dec).replace(".", ",")}<small></small>`;
+      statNum.lastChild.textContent = txt.unit;
+      statNum.style.opacity = P(t,25.4,26.4);
+      statLabel.style.opacity = P(t,27,28.2,E.outCubic);
+      statLabel.style.transform = `translateY(${(1-P(t,27,28.2,E.outCubic))*12}px)`;
+    }
+
+    // ---- Scene 5 : signature ----
+    {
+      const fin = 1-P(t,38.4,39.8,E.inOut);
+      const kP = P(t,32.6,34.1,E.outBack);
+      pill.style.transform = `scale(${mix(.6,1,kP)})`;
+      pill.style.setProperty("--sheen", mix(-120,220,P(t,35.4,37.2,E.inOutSine))+"%");
+      show(pill, Math.min(1,P(t,32.6,33.4))*fin);
+      pill.style.filter = fin<1?`blur(${(1-fin)*12}px)`:"none";
+      const kc = P(t,33.5,34.6,E.outCubic);
+      pillName.style.opacity = kc; pillName.style.transform = `translateX(${(1-kc)*-18}px)`;
+      const kb = P(t,33.9,35,E.outCubic);
+      $("pillCta").style.opacity = kb; $("pillCta").style.transform = `translateX(${(1-kb)*18}px)`;
+      const kr = P(t,34.2,35.6,E.outExpo);
+      rule.style.transform = `scaleX(${kr})`; show(rule, kr*fin);
+      const kh = P(t,34.8,36,E.outCubic);
+      handle.style.transform = `translateY(${(1-kh)*12}px)`; handle.style.letterSpacing = mix(.4,.18,kh)+"em"; show(handle, kh*fin);
+    }
+  }
+
+  // ---------- transport ----------
+  let t = 0, playing = true, loop = true, last = performance.now();
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce) { playing = false; t = 12; }
+  const fmt = (s, tenths=true) => { const m=Math.floor(s/60), r=s-m*60; return `${String(m).padStart(2,"0")}:${tenths? r.toFixed(1).padStart(4,"0") : String(Math.floor(r)).padStart(2,"0")}`; };
+
+  const playBtn=$("play"), scrub=$("scrub"), tcNow=$("tcNow"), loopBtn=$("loop");
+  const markers=$("markers"), list=$("sceneList");
+  SCENES.forEach((s,i)=>{
+    const b=document.createElement("button"); b.type="button"; b.textContent=s.name; b.title=`Aller à ${s.name} (${fmt(s.from,false)})`;
+    b.addEventListener("click",()=>{ t=s.from+.001; frame(); }); markers.appendChild(b);
+    const li=document.createElement("li");
+    li.innerHTML=`<div class="t">${fmt(s.from,false)} – ${fmt(s.to,false)}</div><div><strong></strong><span></span></div>`;
+    li.querySelector("strong").textContent=s.name; li.querySelector("span").textContent=s.desc; list.appendChild(li);
+  });
+
+  function syncUI(){
+    playBtn.textContent = playing ? "Pause" : "Lecture";
+    scrub.value = Math.round(t*1000);
+    tcNow.textContent = fmt(t);
+    const idx = SCENES.findIndex(s=>t>=s.from && t<s.to);
+    [...markers.children].forEach((b,i)=>b.classList.toggle("on",i===idx));
+    [...list.children].forEach((li,i)=>li.classList.toggle("on",i===idx));
+  }
+  function frame(){ render(t); syncUI(); }
+  function tick(now){
+    const dt = Math.min(.1,(now-last)/1000); last = now;
+    if (playing){ t += dt; if (t>=DUR){ if (loop) t -= DUR; else { t = DUR; playing=false; } } frame(); }
+    requestAnimationFrame(tick);
+  }
+  playBtn.addEventListener("click",()=>{ if(!playing && t>=DUR) t=0; playing=!playing; frame(); });
+  $("restart").addEventListener("click",()=>{ t=0; frame(); });
+  loopBtn.addEventListener("click",()=>{ loop=!loop; loopBtn.setAttribute("aria-pressed",String(loop)); });
+  scrub.addEventListener("input",()=>{ t=scrub.value/1000; frame(); });
+  $("fs").addEventListener("click",()=>{ const p = document.fullscreenElement ? document.exitFullscreen() : wrap.requestFullscreen?.(); p && p.catch && p.catch(()=>{}); });
+  document.addEventListener("keydown",e=>{ if(e.code==="Space" && !/INPUT|TEXTAREA|BUTTON/.test(e.target.tagName)){ e.preventDefault(); playBtn.click(); } });
+
+  // scale stage to container
+  const fit = () => { stage.style.transform = `scale(${wrap.clientWidth/1920})`; };
+  new ResizeObserver(fit).observe(wrap); fit();
+
+  // text editor
+  const form=$("form");
+  Object.keys(DEFAULTS).forEach(k=>{ const el=form.elements[k]; if(el) el.value = txt[k]; });
+  form.addEventListener("input",e=>{ txt[e.target.name]=e.target.value; try{localStorage.setItem("lgm-text",JSON.stringify(txt));}catch(_){} applyText(); render(t); });
+  form.addEventListener("submit",e=>e.preventDefault());
+
+  applyText(); frame(); requestAnimationFrame(tick);
+})();
+</script>
+
+</body>
+</html>
